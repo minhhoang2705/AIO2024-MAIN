@@ -1,25 +1,21 @@
 def levenshtein_distance(source, target):
-    # Bước 1: Xây dựng ma trận lưu trữ
-    rows = len(source) + 1
-    cols = len(target) + 1
-    D = [[0 for _ in range(cols)] for _ in range(rows)]
+    # đảm bảo rằng chuỗi source luôn dài hơn hoặc bằng chuỗi target để giảm thiểu việc sử dụng bộ nhớ
+    if len(source) < len(target):
+        source, target = target, source
 
-    # Bước 2: Hoàn thiện hàng và cột đầu tiên
-    for i in range(1, rows):
-        D[i][0] = i
-    for j in range(1, cols):
-        D[0][j] = j
+    # Khởi tạo hàng trước (previous_row)
+    previous_row = list(range(len(target) + 1))
 
-    # Bước 3: Tính toán các giá trị với các ô còn lại trong ma trận
-    for i in range(1, rows):
-        for j in range(1, cols):
-            del_cost = D[i-1][j] + 1
-            ins_cost = D[i][j-1] + 1
-            sub_cost = D[i-1][j-1] + (0 if source[i-1] == target[j-1] else 1)
-            D[i][j] = min(del_cost, ins_cost, sub_cost)
+    for i, s_char in enumerate(source, start=1):
+        current_row = [i]
+        for j, t_char in enumerate(target, start=1):
+            insertions = previous_row[j] + 1
+            deletions = current_row[j - 1] + 1
+            substitutions = previous_row[j - 1] + (s_char != t_char)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
 
-    # Bước 4: Trả về giá trị tại ô cuối cùng của ma trận
-    return D[rows-1][cols-1]
+    return previous_row[-1]
 
 
 if __name__ == "__main__":
